@@ -1,5 +1,19 @@
 import LocalSource from "@/datasource/controller";
 
+async function getAccountFromLocalSource(data) {
+  return LocalSource.getAccount(data);
+}
+
+async function getAccount(data) {
+  let response = null;
+  try {
+    response = await getAccountFromLocalSource(data);
+  } catch (err) {
+    response = { error: 1, status: 500, data: "Erreur réseau" };
+  }
+  return response;
+}
+
 async function getAccountAmountFromLocalSource(number) {
   // récupération auprès de la source locale
   return LocalSource.getAccountAmount(number)
@@ -37,6 +51,7 @@ async function getAccountTransactions(number) {
 }
 
 export default {
+  getAccount,
   getAccountAmount,
-  getAccountTransactions,
+  getAccountTransactions
 }

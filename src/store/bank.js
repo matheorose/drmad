@@ -5,50 +5,34 @@ Vue.use(Vuex)
 
 import BankAccountService from "@/services/bankaccount.service";
 
-export default({
+export default {
+    namespaced: true,
     state: () => ({
-        viruses: [],
-        shopUser: null,
-        accountAmount: 0,
-        accountTransactions: [],
-        accountNumberError: 0,
+        currentAccount: null, // Compte connecté
+        accountNumberError: 0, // Erreur (1 = valide, -1 = invalide)
     }),
-
     mutations: {
-        updateAccountAmount(state, amount) {
-            state.accountAmount = amount
-        },
-        updateAccountTransactions(state, transactions) {
-            state.accountTransactions = transactions
+        updateCurrentAccount(state, account) {
+            console.log("Mutation updateCurrentAccount appelée avec :", account);
+            state.currentAccount = account; // Affectation directe pour conserver la réactivité
         },
         updateAccountNumberError(state, error) {
-            state.accountNumberError = error
-        }
+            console.log("Mutation updateAccountNumberError appelée avec :", error);
+            state.accountNumberError = error;
+        },
     },
-
     actions: {
+        async getAccount({ commit }, number) {
+            console.log("getAccount appelé avec le numéro :", number); // Vérifie l'entrée
+            const response = await BankAccountService.getAccount({ number });
+            console.log("Réponse de getAccount :", response); // Vérifie la réponse de l'API
 
-        async getAccountAmount({commit}, number) {
-            console.log('get account amount');
-            let response = await BankAccountService.getAccountAmount(number)
             if (response.error === 0) {
-                commit('updateAccountAmount', response.data)
-                commit('updateAccountNumberError', 1)
+                commit("updateCurrentAccount", response.data);
+                commit("updateAccountNumberError", 0); // Compte valide
             } else {
-                console.log(response.data)
-                commit('updateAccountNumberError', -1)
+                commit("updateAccountNumberError", -1); // Compte invalide
             }
         },
-        async getAccountTransactions({commit}, number) {
-            console.log('get account transactions');
-            let response = await BankAccountService.getAccountTransactions(number)
-            if (response.error === 0) {
-                commit('updateAccountTransactions', response.data)
-                commit('updateAccountNumberError', 1)
-            } else {
-                console.log(response.data)
-                commit('updateAccountNumberError', -1)
-            }
-        },
-    }
-})
+    },
+};

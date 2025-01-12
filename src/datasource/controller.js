@@ -13,6 +13,15 @@ function getAllViruses() {
   return {error: 0, data: items}
 }
 
+
+function getAccount(data) {
+  const account = bankaccounts.find(a => a.number === data.number);
+  if (!account) {
+    return { error: 1, status: 404, data: "Numéro de compte invalide" };
+  }
+  return { error: 0, status: 200, data: account };
+}
+
 function getAccountAmount(number) {
   if (!number) return {error: 1, status: 404, data: 'aucun numéro de compte bancaire fourni'}
   let account = bankaccounts.find(a => a.number === number)
@@ -159,6 +168,7 @@ function shopLogin(data) {
 
 export default{
   shopLogin,
+  getAccount,
   getAllViruses,
   getAccountAmount,
   getAccountTransactions,

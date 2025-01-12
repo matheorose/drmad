@@ -22,7 +22,7 @@ export default {
       if (index === 0) {
         this.$router.push("/shop"); // Navigue vers la boutique
       } else if (index === 1) {
-        this.$router.push("/bank/account"); // Navigue vers la banque
+        this.$router.push("/bank"); // Navigue vers la banque
       }
     },
   },
