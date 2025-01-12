@@ -14,6 +14,10 @@ async function getAccount(data) {
   return response;
 }
 
+async function logout() {
+  return { error: 0, status: 200, data: "Déconnexion réussie" };
+}
+
 async function getAccountAmountFromLocalSource(number) {
   // récupération auprès de la source locale
   return LocalSource.getAccountAmount(number)
@@ -52,6 +56,7 @@ async function getAccountTransactions(number) {
 
 export default {
   getAccount,
+  logout,
   getAccountAmount,
   getAccountTransactions
 }

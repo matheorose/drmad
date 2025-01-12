@@ -39,15 +39,12 @@
       <div>
         <h1>Bienvenu dans la banque</h1>
         <component :is="currentComponent" />
-        <!-- Message d'erreur pour numéro invalide -->
-        <p v-if="accountNumberError === -1" style="color: red;">
-          Numéro de compte invalide. Veuillez réessayer.
-        </p>
       </div>
 
       <!-- Composant de droite -->
       <div>
-        <button @click="goToMyAccount">Mon Compte</button>
+        <button v-if="isAccountValid" @click="handleLogout">Déconnexion</button>
+        <button v-else @click="goToMyAccount">Mon Compte</button>
       </div>
     </div>
   </div>
@@ -61,19 +58,16 @@ export default {
   data() {
     return {
       currentComponent: null,
-      accountNumber: "", // Numéro de compte saisi
     };
   },
   computed: {
     ...mapState("bank", ["currentAccount", "accountNumberError"]),
     isAccountValid() {
-      console.log("currentAccount :", this.currentAccount);
-      console.log("accountNumberError :", this.accountNumberError);
       return this.currentAccount !== null && this.accountNumberError === 0;
     },
   },
   methods: {
-    ...mapActions(["getAccount"]),
+    ...mapActions("bank", ["getAccount", "logout"]),
     showBalance() {
       alert(`Solde disponible : ${this.currentAccount.amount} €`);
     },
@@ -85,6 +79,12 @@ export default {
     },
     goToMyAccount() {
       this.currentComponent = BankAccount;
+    },
+    handleLogout() {
+      // Appelle l'action du store pour déconnecter
+      this.logout();
+      // Réinitialise la vue centrale
+      this.currentComponent = null;
     },
   },
 };
