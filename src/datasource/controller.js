@@ -1,6 +1,7 @@
 import { items, shopusers, bankaccounts, transactions } from './data'
 import {v4 as uuidv4} from 'uuid'
 import bcrypt from 'bcryptjs';
+
 /* controllers: les fonctions ci-dessous doivent mimer ce que renvoie l'API en fonction des requêtes possibles.
 
   Dans certains cas, ces fonctions vont avoir des paramètres afin de filtrer les données qui se trouvent dans data.js
@@ -8,6 +9,66 @@ import bcrypt from 'bcryptjs';
 
   Exemple 1 : se loguer auprès de la boutique
  */
+
+function createTransaction(data) {
+  const { idAccount, amount, destNumber } = data;
+
+  // Trouver le compte source
+  const sourceAccount = bankaccounts.find(acc => acc._id === idAccount);
+  if (!sourceAccount) {
+    return { error: 1, status: 404, data: "Compte source introuvable" };
+  }
+
+  // Vérifier si c'est un virement
+  let destinationAccount = null;
+  if (destNumber) {
+    destinationAccount = bankaccounts.find(acc => acc.number === destNumber);
+    if (!destinationAccount) {
+      return { error: 1, status: 404, data: "Compte destinataire introuvable" };
+    }
+  }
+
+  // Vérifier si le montant est valide
+  if (amount <= 0 || sourceAccount.amount < amount) {
+    return { error: 1, status: 400, data: "Montant invalide ou solde insuffisant" };
+  }
+
+  // Débit sur le compte source
+  sourceAccount.amount -= amount;
+
+  // Créer la transaction de débit
+  const debitTransaction = {
+    _id: uuidv4(),
+    amount: -amount,
+    account: sourceAccount._id,
+    date: { $date: new Date() },
+  };
+
+  transactions.push(debitTransaction);
+
+  // Si c'est un virement, créditer le compte destinataire
+  if (destinationAccount) {
+    destinationAccount.amount += amount;
+
+    const creditTransaction = {
+      _id: uuidv4(),
+      amount: amount,
+      account: destinationAccount._id,
+      date: { $date: new Date() },
+    };
+
+    transactions.push(creditTransaction);
+  }
+
+  return {
+    error: 0,
+    status: 200,
+    data: {
+      uuid: debitTransaction._id,
+      amount: sourceAccount.amount,
+    },
+  };
+}
 
 function getAllViruses() {
   return {error: 0, data: items}
@@ -171,7 +232,21 @@ function shopLogin(data) {
   });
 }
 
+function getAccountTransactionsFromLocalSource(idAccount) {
+  console.log("ID du compte transmis :", idAccount); // Debugging log
+  const accountTransactions = transactions.filter(t => t.account === idAccount);
+
+  if (accountTransactions.length > 0) {
+    console.log("Transactions trouvées :", accountTransactions); // Debugging log
+    return { error: 0, status: 200, data: accountTransactions };
+  }
+
+  console.log("Aucune transaction trouvée pour cet ID"); // Debugging log
+  return { error: 1, status: 404, data: "Aucune transaction trouvée pour ce compte" };
+}
+
 export default{
+  createTransaction,
   shopLogin,
   getAccount,
   logout,
@@ -184,4 +259,5 @@ export default{
   payOrderForUser,
   getOrdersForUser,
   cancelOrderForUser,
+  getAccountTransactionsFromLocalSource,
 }

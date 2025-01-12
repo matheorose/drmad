@@ -38,7 +38,10 @@
       <!-- Composant central -->
       <div>
         <h1>Bienvenu dans la banque</h1>
-        <component :is="currentComponent" />
+        <component
+            :is="currentComponent"
+            v-bind="currentComponent === BankHistory ? { transactions: accountTransactions } : {}"
+        />
       </div>
 
       <!-- Composant de droite -->
@@ -51,41 +54,49 @@
 </template>
 
 <script>
-import { mapState, mapActions } from "vuex";
+import {mapActions, mapState} from "vuex";
 import BankAccount from "./BankAccountView.vue";
+import BankOperation from "./BankOperation.vue";
+import BankHistory from "@/views/BankHistory.vue";
 
 export default {
   data() {
     return {
-      currentComponent: null,
+      currentComponent: null, // Composant affiché au centre
     };
   },
   computed: {
-    ...mapState("bank", ["currentAccount", "accountNumberError"]),
+    BankHistory() {
+      return BankHistory
+    },
+    ...mapState("bank", ["currentAccount", "accountNumberError", "accountTransactions"]),
     isAccountValid() {
       return this.currentAccount !== null && this.accountNumberError === 0;
     },
   },
   methods: {
-    ...mapActions("bank", ["getAccount", "logout"]),
+    ...mapActions("bank", ["logout"]),
     showBalance() {
       alert(`Solde disponible : ${this.currentAccount.amount} €`);
     },
     makeTransaction() {
-      alert("Débit ou virement à réaliser.");
+      this.currentComponent = BankOperation; // Affiche BankOperation
     },
     showHistory() {
-      alert("Historique des transactions.");
+      this.currentComponent = BankHistory; // Affiche BankHistory
     },
     goToMyAccount() {
-      this.currentComponent = BankAccount;
+      this.currentComponent = BankAccount; // Affiche BankAccount
     },
     handleLogout() {
-      // Appelle l'action du store pour déconnecter
-      this.logout();
-      // Réinitialise la vue centrale
-      this.currentComponent = null;
+      this.logout(); // Appelle l'action logout du store
+      this.currentComponent = null; // Réinitialise la vue centrale
     },
+  },
+  components: {
+    BankAccount,
+    BankOperation,
+    BankHistory,
   },
 };
 </script>
