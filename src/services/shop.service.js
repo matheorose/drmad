@@ -12,7 +12,7 @@ async function shopLoginFromLocalSource(data) {
 async function getAllVirusesFromLocalSource() {
   try {
     const response = await LocalSource.getAllViruses();
-    console.log("Données récupérées depuis LocalSource :", response); // Vérification des données
+    console.log("Données récupérées depuis LocalSource:", response); // Vérification des données
     return response;
   } catch (err) {
     console.error("Erreur lors de la récupération des viruses :", err);

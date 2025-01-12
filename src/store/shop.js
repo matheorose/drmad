@@ -26,7 +26,7 @@ export default {
         updateViruses(state, viruses) {
             console.log("Mise à jour des viruses avant :", state.viruses);
             state.viruses = viruses;
-            console.log("Mise à jour des viruses après :", state.viruses);
+            console.log("Mise à jour des viruses après:", state.viruses);
         },
         setBasket(state, basket) {
             Vue.set(state, "basket", basket || { items: [] });

@@ -44,7 +44,7 @@ export default {
       try {
         await this.$store.dispatch("removeItemFromBasket", itemId);
       } catch (error) {
-        console.error("Erreur lors de la suppression de l'article :", error);
+        console.error("Erreur lors de la suppression de l'article:", error);
       }
     },
     async clearBasket() {

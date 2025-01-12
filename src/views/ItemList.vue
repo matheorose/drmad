@@ -3,7 +3,7 @@
     <!-- En-tête : titre -->
     <div class="row">
       <div class="col-12">
-        <h1>Les virus</h1>
+        <h1>Les virus :</h1>
       </div>
     </div>
 
