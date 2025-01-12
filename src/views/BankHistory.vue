@@ -87,7 +87,10 @@ export default {
     },
     viewDetails(transaction) {
       alert(
-          `Transaction:\nID: ${transaction._id}\nMontant: ${transaction.amount} €\nDate: ${
+          `Transaction:
+UUID: ${transaction.uuid}
+Montant: ${transaction.amount} €
+Date: ${
               transaction.date ? this.formatDate(transaction.date.$date) : "Date inconnue"
           }`
       );
