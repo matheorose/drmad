@@ -89,24 +89,28 @@ export default {
                 console.error("Erreur lors de la mise à jour du panier:", error);
             }
         },
-        async shopLogin({ commit }, { username, password }) {
+        async shopLogin({ commit }, { login, password }) {
             try {
-                if (username === "drmad" && password === "drmad") {
-                    const user = { username, _id: "user-drmad" };
-                    commit("updateShopUser", user);
-                    return user;
+                const response = await ShopService.shopLoginService({ login, password });
+
+                if (response.error === 0 && response.data) {
+                    commit("updateShopUser", {
+                        username: response.data.login || login,
+                        _id: response.data._id,
+                        name: response.data.name,
+                        email: response.data.email,
+                    });
+                    return response;
                 } else {
                     commit("updateShopUser", null);
-                    throw new Error("Identifiants invalides");
+                    throw new Error(response.data || "Identifiants invalides");
                 }
             } catch (error) {
                 commit("updateShopUser", null);
                 throw error;
             }
         },
-        logout({ commit }) {
-            commit("logoutUser");
-        },
+
         // Actions ajoutées :
         removeItemFromBasket({ commit }, itemId) {
             commit("removeFromBasket", itemId);

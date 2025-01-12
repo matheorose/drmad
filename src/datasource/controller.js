@@ -1,32 +1,24 @@
-import { items, shopusers, bankaccounts, transactions } from './data'
-import {v4 as uuidv4} from 'uuid'
-import bcrypt from 'bcryptjs';
-/* controllers: les fonctions ci-dessous doivent mimer ce que renvoie l'API en fonction des requêtes possibles.
-
-  Dans certains cas, ces fonctions vont avoir des paramètres afin de filtrer les données qui se trouvent dans data.js
-  Ces paramètres sont généralement les mêmes qu'ils faudrait envoyer à l'API, mais pas forcément.
-
-  Exemple 1 : se loguer auprès de la boutique
- */
+import { items, shopusers, bankaccounts, transactions} from './data'
+import { v4 as uuidv4 } from 'uuid'
+import bcrypt from 'bcryptjs'
 
 function getAllViruses() {
-  return {error: 0, data: items}
+  return { error: 0, data: items }
 }
 
 function getAccountAmount(number) {
-  if (!number) return {error: 1, status: 404, data: 'aucun numéro de compte bancaire fourni'}
+  if (!number) return { error: 1, status: 404, data: 'aucun numéro de compte bancaire fourni' }
   let account = bankaccounts.find(a => a.number === number)
-  if (!account) return {error: 1, status: 404, data: 'numéro de compte bancaire incorrect'}
-  return {error: 0, status: 200, data: account.amount}
+  if (!account) return { error: 1, status: 404, data: 'numéro de compte bancaire incorrect' }
+  return { error: 0, status: 200, data: account.amount }
 }
 
 function getAccountTransactions(number) {
-  if (!number) return {error: 1, status: 404, data: 'aucun numéro de compte bancaire fourni'}
+  if (!number) return { error: 1, status: 404, data: 'aucun numéro de compte bancaire fourni' }
   let account = bankaccounts.find(a => a.number === number)
-  if (!account) return {error: 1, status: 404, data: 'numéro de compte bancaire incorrect'}
-  // récupérer les transaction grâce à l'_id du compte
+  if (!account) return { error: 1, status: 404, data: 'numéro de compte bancaire incorrect' }
   let trans = transactions.filter(t => t.account === account._id)
-  return {error: 0, status: 200, data: trans}
+  return { error: 0, status: 200, data: trans }
 }
 
 function updateUserBasket(userId, basket) {
@@ -52,7 +44,6 @@ function createOrderForUser(userId, order) {
     return { error: 1, status: 404, data: "Utilisateur non trouvé" };
   }
 
-  // Calcul du total avec promotions
   let total = 0;
   order.items.forEach(item => {
     total += item.item.price * item.amount;
@@ -61,7 +52,6 @@ function createOrderForUser(userId, order) {
     });
   });
 
-  // Création de la commande
   const newOrder = {
     ...order,
     total,
@@ -70,7 +60,6 @@ function createOrderForUser(userId, order) {
     uuid: uuidv4(),
   };
 
-  // Ajout à la liste des commandes de l'utilisateur
   if (!user.orders) {
     user.orders = [];
   }
@@ -90,10 +79,7 @@ function payOrderForUser(userId, orderId) {
     return { error: 1, status: 404, data: "Commande non trouvée" };
   }
 
-  // Modifier le statut de la commande à "finalized"
   order.status = "finalized";
-
-  // Retourner la réponse avec succès
   return { error: 0, status: 200, data: "Commande payée avec succès" };
 }
 
@@ -102,8 +88,6 @@ function getOrdersForUser(userId) {
   if (!user) {
     return { error: 1, status: 404, data: 'Utilisateur non trouvé' };
   }
-
-  // Retourner les commandes de l'utilisateur
   return { error: 0, status: 200, data: user.orders || [] };
 }
 
@@ -118,38 +102,37 @@ function cancelOrderForUser(userId, orderId) {
     return { error: 1, status: 404, data: 'Commande non trouvée' };
   }
 
-  // Annuler la commande
   order.status = 'cancelled';
-
   return { error: 0, status: 200, data: 'Commande annulée avec succès' };
 }
+
 
 function shopLogin(data) {
   return new Promise((resolve, reject) => {
     if (!data || !data.login || !data.password) {
-      reject({ error: 1, status: 400, data: "Données de connexion manquantes" });
-      return;
+      return reject({ error: 1, status: 400, data: "Données de connexion manquantes" });
     }
 
-    // Recherche de l'utilisateur dans shopusers
-    const user = shopusers.find(user => user.login === data.login);
+    const user = shopusers.find(u => u.login === data.login);
     if (!user) {
-      reject({ error: 1, status: 404, data: "Utilisateur non trouvé" });
-      return;
+      return reject({ error: 1, status: 404, data: "Utilisateur non trouvé" });
     }
 
-    // Comparaison du mot de passe
     bcrypt.compare(data.password, user.password, (err, result) => {
-      if (err || !result) {
-        reject({ error: 1, status: 401, data: "Mot de passe incorrect" });
-        return;
+      if (err) {
+        console.error("Erreur lors de la comparaison du mot de passe :", err);
+        return reject({ error: 1, status: 500, data: "Erreur interne" });
+      }
+      if (!result) {
+        console.error("Mot de passe incorrect pour l'utilisateur :", data.login);
+        return reject({ error: 1, status: 401, data: "Mot de passe incorrect" });
       }
 
-      // Générer un session (par exemple, ici on renvoie l'utilisateur sans mot de passe)
       const userWithoutPassword = {
+        _id: user._id,
         login: user.login,
         name: user.name,
-        email: user.email
+        email: user.email,
       };
 
       resolve({ error: 0, status: 200, data: userWithoutPassword });
@@ -157,7 +140,7 @@ function shopLogin(data) {
   });
 }
 
-export default{
+export {
   shopLogin,
   getAllViruses,
   getAccountAmount,
@@ -168,4 +151,4 @@ export default{
   payOrderForUser,
   getOrdersForUser,
   cancelOrderForUser,
-}
+};

@@ -7,7 +7,7 @@
         <input
             type="text"
             id="username"
-            v-model="username"
+            v-model="login"
             placeholder="Entrez votre login"
             required
         />
@@ -24,70 +24,70 @@
       </div>
       <button type="submit">Login</button>
     </form>
+    <p v-if="errorMessage" style="color: red;">{{ errorMessage }}</p>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: "ShopLoginView",
   data() {
     return {
-      username: "", // Champs pour stocker le login
-      password: "", // Champs pour stocker le mot de passe
+      login: '',
+      password: '',
+      errorMessage: '',
     };
   },
   methods: {
-    handleLogin() {
-      // Vérifie les champs et effectue une action (comme appeler une API ou valider localement)
-      if (this.username && this.password) {
-        console.log(`Utilisateur: ${this.username}, Mot de passe: ${this.password}`);
-        this.$router.push("/shop/buy"); // Redirige vers /shop/buy
-      } else {
-        alert("Veuillez remplir tous les champs !");
-      }
-    },
-  },
-};
-</script>
-
-
-<!--
-<template>
-  <div>
-    <h1>Login</h1>
-
-    <span>login</span><input v-model="login" type="text">
-    <span>password</span><input v-model="password" type="password">
-    <button @click="handleLogin">Login</button>
-
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-  </div>
-</template>
-
-<script>
-import { mapState, mapActions } from 'vuex';
-export default {
-  name: 'ShopLoginView',
-  data: () => ({
-    login: '',
-    password: '',
-    errorMessage: '',
-  }),
-  computed: {
-    ...mapState(['shopUser']),
-  },
-  methods: {
-    ...mapActions(['shopLogin']),
+    ...mapActions('shop', ['shopLogin']),
     async handleLogin() {
-      const response = await this.shopLogin({ login: this.login, password: this.password });
+      if (!this.login || !this.password) {
+        this.errorMessage = "Veuillez remplir tous les champs !";
+        return;
+      }
 
-      if (response.error) {
-        this.errorMessage = 'Login ou mot de passe incorrect.';
-      } else {
-        this.$router.push('/shop/buy');
+      try {
+        const response = await this.shopLogin({login: this.login, password: this.password});
+        if (response && response.error === 0) {
+          this.$router.push('/shop/buy');
+        } else {
+          this.errorMessage = response.data || "Login ou mot de passe incorrect.";
+        }
+      } catch (error) {
+        this.errorMessage = error.message || "Une erreur s'est produite lors de la connexion.";
       }
     },
   },
 };
 </script>
--->
+
+<style scoped>
+/* Styles pour le formulaire de connexion */
+form {
+  max-width: 300px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+div {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+button {
+  padding: 10px;
+}
+</style>

@@ -1,136 +1,142 @@
 <template>
   <div class="container my-4">
-    <!-- En-tête : titre -->
-    <div class="row">
-      <div class="col-12">
-        <h1>Les virus :</h1>
-      </div>
+    <div v-if="!shopUser" class="alert alert-warning">
+      Vous devez être connecté pour voir les virus.
     </div>
 
-    <!-- Formulaire de filtre -->
-    <div class="card p-3 my-3">
-      <div class="form-row">
-        <div class="col-md-2 mb-2">
-          <label for="filterName">Nom :</label>
-          <input
-              type="text"
-              class="form-control"
-              id="filterName"
-              v-model="searchName"
-              placeholder="Ex: covid"
-          />
-        </div>
-        <div class="col-md-2 mb-2">
-          <label for="priceMin">Prix min :</label>
-          <input
-              type="number"
-              class="form-control"
-              id="priceMin"
-              v-model.number="searchMinPrice"
-              placeholder="0"
-          />
-        </div>
-        <div class="col-md-2 mb-2">
-          <label for="priceMax">Prix max :</label>
-          <input
-              type="number"
-              class="form-control"
-              id="priceMax"
-              v-model.number="searchMaxPrice"
-              placeholder="1000"
-          />
-        </div>
-        <div class="col-md-2 mb-2">
-          <label for="stockMin">Stock min :</label>
-          <input
-              type="number"
-              class="form-control"
-              id="stockMin"
-              v-model.number="searchMinStock"
-              placeholder="0"
-          />
-        </div>
-        <div class="col-md-2 mb-2">
-          <label for="stockMax">Stock max :</label>
-          <input
-              type="number"
-              class="form-control"
-              id="stockMax"
-              v-model.number="searchMaxStock"
-              placeholder="9999"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Zone d'affichage : si aucun virus, message -->
-    <div v-if="!viruses || viruses.length === 0" class="alert alert-info">
-      Chargement des données...
-    </div>
-    <!-- Sinon, on affiche le tableau filtré -->
     <div v-else>
-      <table class="table table-hover">
-        <thead class="thead-light">
-        <tr>
-          <th></th> <!-- Colonne pour la case à cocher -->
-          <th>Nom</th>
-          <th>Prix</th>
-          <th>Stock</th>
-          <th>Promotions</th>
-          <th style="width:120px;">Quantité</th>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <!-- On parcourt la liste filtrée -->
-        <tr v-for="(virus, index) in filteredViruses" :key="virus._id">
-          <td>
-            <!-- Case à cocher pour la sélection multiple -->
-            <input type="checkbox" v-model="selectedViruses" :value="virus" />
-          </td>
-          <td>{{ virus.name }}</td>
-          <td>{{ virus.price }}</td>
-          <td>{{ virus.stock }}</td>
-          <td>
-            <div v-if="virus.promotion && virus.promotion.length">
-              <ul class="mb-0">
-                <li v-for="(promo, iPromo) in virus.promotion" :key="iPromo">
-                  <strong>-{{ promo.discount }}%</strong> x {{ promo.amount }}
-                </li>
-              </ul>
-            </div>
-            <div v-else>
-              Aucune promo
-            </div>
-          </td>
-          <td>
+      <!-- En-tête : titre -->
+      <div class="row">
+        <div class="col-12">
+          <h1>Les virus :</h1>
+        </div>
+      </div>
+
+      <!-- Formulaire de filtre -->
+      <div class="card p-3 my-3">
+        <div class="form-row">
+          <div class="col-md-2 mb-2">
+            <label for="filterName">Nom :</label>
+            <input
+                type="text"
+                class="form-control"
+                id="filterName"
+                v-model="searchName"
+                placeholder="Ex: covid"
+            />
+          </div>
+          <div class="col-md-2 mb-2">
+            <label for="priceMin">Prix min :</label>
             <input
                 type="number"
-                class="form-control form-control-sm"
-                min="1"
-                v-model.number="quantities[index]"
-                @focus="ensureQuantityIsNotNull(index)"
+                class="form-control"
+                id="priceMin"
+                v-model.number="searchMinPrice"
+                placeholder="0"
             />
-          </td>
-          <td>
-            <button
-                class="btn btn-sm btn-primary"
-                @click="addItemToBasketMethod(virus, quantities[index])"
-            >
-              Ajouter
-            </button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+          </div>
+          <div class="col-md-2 mb-2">
+            <label for="priceMax">Prix max :</label>
+            <input
+                type="number"
+                class="form-control"
+                id="priceMax"
+                v-model.number="searchMaxPrice"
+                placeholder="1000"
+            />
+          </div>
+          <div class="col-md-2 mb-2">
+            <label for="stockMin">Stock min :</label>
+            <input
+                type="number"
+                class="form-control"
+                id="stockMin"
+                v-model.number="searchMinStock"
+                placeholder="0"
+            />
+          </div>
+          <div class="col-md-2 mb-2">
+            <label for="stockMax">Stock max :</label>
+            <input
+                type="number"
+                class="form-control"
+                id="stockMax"
+                v-model.number="searchMaxStock"
+                placeholder="9999"
+            />
+          </div>
+        </div>
+      </div>
 
-      <div class="text-right">
-        <button class="btn btn-success" @click="addAllToBasket">
-          Ajouter tout
-        </button>
-        <button class="btn btn-info ml-2" @click="addSelectedToBasket">
-          Ajouter sélectionnés
-        </button>
+      <!-- Zone d'affichage : si aucun virus, message -->
+      <div v-if="!viruses || viruses.length === 0" class="alert alert-info">
+        Chargement des données...
+      </div>
+      <!-- Sinon, on affiche le tableau filtré -->
+      <div v-else>
+        <table class="table table-hover">
+          <thead class="thead-light">
+          <tr>
+            <th></th> <!-- Colonne pour la case à cocher -->
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Stock</th>
+            <th>Promotions</th>
+            <th style="width:120px;">Quantité</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <!-- On parcourt la liste filtrée -->
+          <tr v-for="(virus, index) in filteredViruses" :key="virus._id">
+            <td>
+              <!-- Case à cocher pour la sélection multiple -->
+              <input type="checkbox" v-model="selectedViruses" :value="virus" />
+            </td>
+            <td>{{ virus.name }}</td>
+            <td>{{ virus.price }}</td>
+            <td>{{ virus.stock }}</td>
+            <td>
+              <div v-if="virus.promotion && virus.promotion.length">
+                <ul class="mb-0">
+                  <li v-for="(promo, iPromo) in virus.promotion" :key="iPromo">
+                    <strong>-{{ promo.discount }}%</strong> x {{ promo.amount }}
+                  </li>
+                </ul>
+              </div>
+              <div v-else>
+                Aucune promo
+              </div>
+            </td>
+            <td>
+              <input
+                  type="number"
+                  class="form-control form-control-sm"
+                  min="1"
+                  v-model.number="quantities[index]"
+                  @focus="ensureQuantityIsNotNull(index)"
+              />
+            </td>
+            <td>
+              <button
+                  class="btn btn-sm btn-primary"
+                  @click="addItemToBasketMethod(virus, quantities[index])"
+              >
+                Ajouter
+              </button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+
+        <div class="text-right">
+          <button class="btn btn-success" @click="addAllToBasket">
+            Ajouter tout
+          </button>
+          <button class="btn btn-info ml-2" @click="addSelectedToBasket">
+            Ajouter sélectionnés
+          </button>
+        </div>
       </div>
     </div>
   </div>
