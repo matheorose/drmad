@@ -22,7 +22,6 @@
   </div>
 </template>
 
-
 <script>
 import { mapState } from "vuex";
 import ShopService from "../services/shop.service";
@@ -34,22 +33,22 @@ export default {
     };
   },
   computed: {
-    ...mapState({
-      basket: (state) => state.basket, // Récupère le panier depuis le store
-      shopUser: (state) => state.shopUser, // Récupère l'utilisateur depuis le store
+    ...mapState("shop", {
+      basket: (state) => state.basket,
+      shopUser: (state) => state.shopUser,
     }),
   },
   methods: {
     async removeItem(itemId) {
       try {
-        await this.$store.dispatch("removeItemFromBasket", itemId);
+        await this.$store.dispatch("shop/removeItemFromBasket", itemId);
       } catch (error) {
         console.error("Erreur lors de la suppression de l'article:", error);
       }
     },
     async clearBasket() {
       try {
-        await this.$store.dispatch("clearBasket");
+        await this.$store.dispatch("shop/clearBasket");
       } catch (error) {
         console.error("Erreur lors du vidage du panier :", error);
       }
@@ -87,20 +86,18 @@ export default {
     },
   },
   created() {
-
-    console.log("Viruses dans BasketList.vue :", this.viruses);
     console.log("Basket dans BasketList.vue :", this.basket);
     this.isLoading = true;
-    this.$store.commit("setBasket", { items: [] });
+    this.$store.commit("shop/setBasket", {items: []});
     if (this.shopUser) {
       this.$store
-          .dispatch("fetchBasket", this.shopUser._id)
+          .dispatch("shop/fetchBasket", this.shopUser._id)
           .then(() => {
             console.log("Panier chargé avec succès :", this.basket);
           })
           .catch((error) => {
             console.error("Erreur lors du chargement du panier :", error);
-            this.$store.commit("setBasket", { items: [] });
+            this.$store.commit("shop/setBasket", {items: []});
           })
           .finally(() => {
             this.isLoading = false;

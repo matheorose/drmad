@@ -5,7 +5,6 @@ import ShopService from "../services/shop.service";
 Vue.use(Vuex);
 
 export default {
-
     namespaced: true,
 
     state: () => ({
@@ -38,10 +37,11 @@ export default {
             } else {
                 state.basket.items.push({ item, amount });
             }
-
-            console.log('Article ajouté au panier :', { item, amount });
-            // Journalisation de l'état complet du panier
-            console.log('État actuel du panier :', state.basket);
+            console.log(`Article ajouté : ${item.name} (ID: ${item._id}), Prix: ${item.price}, Stock: ${item.stock}, Quantité: ${amount}`);
+            console.log('État actuel du panier :');
+            state.basket.items.forEach((basketItem, index) => {
+                console.log(` - [${index}] ${basketItem.item.name} (ID: ${basketItem.item._id}) x${basketItem.amount}`);
+            });
         },
         removeFromBasket(state, itemId) {
             state.basket.items = state.basket.items.filter((i) => i.item._id !== itemId);
@@ -60,11 +60,11 @@ export default {
                     commit("updateViruses", response.data);
                 } else {
                     console.error("Erreur lors de la récupération des viruses :", response.data);
-                    commit("updateViruses", []); // Défaut si les données ne sont pas valides
+                    commit("updateViruses", []);
                 }
             } catch (error) {
                 console.error("Erreur réseau lors de la récupération des viruses :", error);
-                commit("updateViruses", []); // Défaut en cas d'erreur
+                commit("updateViruses", []);
             }
         },
         async fetchBasket({ commit }, userId) {
@@ -74,11 +74,11 @@ export default {
                     commit("setBasket", response.data);
                 } else {
                     console.error("Erreur lors de la récupération du panier:", response.data);
-                    commit("setBasket", { items: [] }); // Défaut en cas d'échec
+                    commit("setBasket", { items: [] });
                 }
             } catch (error) {
                 console.error("Erreur réseau lors de la récupération du panier:", error);
-                commit("setBasket", { items: [] }); // Défaut en cas d'échec réseau
+                commit("setBasket", { items: [] });
             }
         },
         async updateBasket({ commit }, { userId, basket }) {
@@ -106,6 +106,13 @@ export default {
         },
         logout({ commit }) {
             commit("logoutUser");
+        },
+        // Actions ajoutées :
+        removeItemFromBasket({ commit }, itemId) {
+            commit("removeFromBasket", itemId);
+        },
+        clearBasket({ commit }) {
+            commit("clearBasket");
         },
     },
 };
