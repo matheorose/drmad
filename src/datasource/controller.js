@@ -13,13 +13,11 @@ import bcrypt from 'bcryptjs';
 function createTransaction(data) {
   const { idAccount, amount, destNumber } = data;
 
-  // Trouver le compte source
   const sourceAccount = bankaccounts.find(acc => acc._id === idAccount);
   if (!sourceAccount) {
     return { error: 1, status: 404, data: "Compte source introuvable" };
   }
 
-  // Vérifier si c'est un virement
   let destinationAccount = null;
   if (destNumber) {
     destinationAccount = bankaccounts.find(acc => acc.number === destNumber);
@@ -28,25 +26,22 @@ function createTransaction(data) {
     }
   }
 
-  // Vérifier si le montant est valide
   if (amount <= 0 || sourceAccount.amount < amount) {
     return { error: 1, status: 400, data: "Montant invalide ou solde insuffisant" };
   }
 
-  // Débit sur le compte source
   sourceAccount.amount -= amount;
 
-  // Créer la transaction de débit
   const debitTransaction = {
     _id: uuidv4(),
     amount: -amount,
     account: sourceAccount._id,
-    date: { $date: new Date() },
+    date: { $date: new Date() }, // Ajout de la date correcte
+    uuid: uuidv4(),
   };
 
   transactions.push(debitTransaction);
 
-  // Si c'est un virement, créditer le compte destinataire
   if (destinationAccount) {
     destinationAccount.amount += amount;
 
@@ -54,20 +49,14 @@ function createTransaction(data) {
       _id: uuidv4(),
       amount: amount,
       account: destinationAccount._id,
-      date: { $date: new Date() },
+      date: { $date: new Date() }, // Ajout de la date correcte
+      uuid: uuidv4(),
     };
 
     transactions.push(creditTransaction);
   }
 
-  return {
-    error: 0,
-    status: 200,
-    data: {
-      uuid: debitTransaction._id,
-      amount: sourceAccount.amount,
-    },
-  };
+  return { error: 0, status: 200, data: debitTransaction };
 }
 
 function getAllViruses() {

@@ -13,7 +13,7 @@
       <tbody>
       <tr v-for="transaction in transactions" :key="transaction._id">
         <td>{{ transaction.amount }} €</td>
-        <td>{{ formatDate(transaction.date.$date) }}</td>
+        <td>{{ transaction.date ? formatDate(transaction.date.$date) : "Date inconnue" }}</td>
         <td>
           <button @click="viewDetails(transaction)">Détails</button>
         </td>
@@ -28,15 +28,19 @@ export default {
   props: {
     transactions: {
       type: Array,
-      required: true, // Assure que les transactions sont fournies
+      required: true,
     },
   },
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleString(); // Formate la date
+      return date ? new Date(date).toLocaleString() : "Date inconnue"; // Vérifie la validité de la date
     },
     viewDetails(transaction) {
-      alert(`Transaction: \nMontant: ${transaction.amount} €\nDate: ${this.formatDate(transaction.date.$date)}`);
+      alert(
+          `Transaction:\nMontant: ${transaction.amount} €\nDate: ${
+              transaction.date ? this.formatDate(transaction.date.$date) : "Date inconnue"
+          }`
+      );
     },
   },
 };
