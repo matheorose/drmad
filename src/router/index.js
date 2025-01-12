@@ -1,29 +1,52 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import Vue from 'vue';
+import VueRouter from 'vue-router';
 
-Vue.use(VueRouter)
+Vue.use(VueRouter);
 
 const routes = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: () => import('../views/HomeView.vue'),
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
-]
+    path: '/shop',
+    component: () => import('../views/ShopView.vue'),  // Vue principale du shop
+    children: [
+      {
+        path: '',
+        component: () => import('../views/ShopHome.vue'),  // Composant d'accueil du shop
+      },
+      {
+        path: 'login',
+        component: () => import('../views/ShopLoginView.vue'),
+      },
+      {
+        path: 'buy',
+        component: () => import('../views/ShopBuy.vue'),
+      },
+      {
+        path: 'pay/:orderId',
+        component: () => import('../views/ShopPay.vue'),
+        props: true,
+      },
+      {
+        path: 'orders',
+        component: () => import('../views/ShopOrders.vue'),
+      },
+    ],
+  },
+  {
+    path: '/bank/account',
+    name: 'bankaccount',
+    component: () => import('../views/BankAccountView.vue'),
+  },
+];
 
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
-  routes
-})
+  routes,
+});
 
-export default router
+export default router;

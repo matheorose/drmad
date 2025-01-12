@@ -1,32 +1,34 @@
 <template>
   <div id="app">
-    <nav>
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </nav>
-    <router-view/>
+    <NavBar :titles="titles" @menu-clicked="goTo($event)" />
+    <router-view />
   </div>
 </template>
 
+<script>
+import NavBar from "@/components/NavBar";
+
+export default {
+  name: "App",
+  components: { NavBar },
+  data: () => ({
+    titles: [
+      { text: "Boutique", color: "blue" },
+      { text: "Banque", color: "red" },
+    ],
+  }),
+  methods: {
+    goTo(index) {
+      if (index === 0) {
+        this.$router.push("/shop"); // Navigue vers la boutique
+      } else if (index === 1) {
+        this.$router.push("/bank/account"); // Navigue vers la banque
+      }
+    },
+  },
+};
+</script>
+
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
+/* Ajoutez ici vos styles globaux, si nécessaire */
 </style>
