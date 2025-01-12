@@ -58,6 +58,7 @@ import {mapActions, mapState} from "vuex";
 import BankAccount from "./BankAccountView.vue";
 import BankOperation from "./BankOperation.vue";
 import BankHistory from "@/views/BankHistory.vue";
+import BankSold from "./BankSold.vue"; // Import du nouveau composant
 
 export default {
   data() {
@@ -77,7 +78,7 @@ export default {
   methods: {
     ...mapActions("bank", ["logout"]),
     showBalance() {
-      alert(`Solde disponible : ${this.currentAccount.amount} €`);
+      this.currentComponent = BankSold;
     },
     makeTransaction() {
       this.currentComponent = BankOperation; // Affiche BankOperation
@@ -97,6 +98,7 @@ export default {
     BankAccount,
     BankOperation,
     BankHistory,
+    BankSold,
   },
 };
 </script>
