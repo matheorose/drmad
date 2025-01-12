@@ -5,50 +5,60 @@ Vue.use(Vuex)
 
 import BankAccountService from "@/services/bankaccount.service";
 
-export default({
+export default {
+    namespaced: true,
     state: () => ({
-        viruses: [],
-        shopUser: null,
-        accountAmount: 0,
-        accountTransactions: [],
+        currentAccount: null,
         accountNumberError: 0,
+        accountTransactions: [],
     }),
-
     mutations: {
-        updateAccountAmount(state, amount) {
-            state.accountAmount = amount
-        },
-        updateAccountTransactions(state, transactions) {
-            state.accountTransactions = transactions
+        updateCurrentAccount(state, account) {
+            state.currentAccount = account;
         },
         updateAccountNumberError(state, error) {
-            state.accountNumberError = error
-        }
+            state.accountNumberError = error;
+        },
+        updateAccountTransactions(state, transactions) {
+            state.accountTransactions = transactions; // Met à jour les transactions
+        },
+        clearAccount(state) {
+            state.currentAccount = null; // Réinitialise le compte courant
+            state.accountNumberError = 0; // Réinitialise les erreurs
+        },
+        addTransaction(state, transaction) {
+            state.accountTransactions.push(transaction); // Ajouter une transaction localement
+        },
     },
-
     actions: {
+        async getAccount({ commit }, number) {
+            const response = await BankAccountService.getAccount({ number });
+            if (response.error === 0) {
+                commit("updateCurrentAccount", response.data);
 
-        async getAccountAmount({commit}, number) {
-            console.log('get account amount');
-            let response = await BankAccountService.getAccountAmount(number)
-            if (response.error === 0) {
-                commit('updateAccountAmount', response.data)
-                commit('updateAccountNumberError', 1)
+                // Récupérer les transactions liées au compte courant
+                const transactionsResponse = await BankAccountService.getAccountTransactions(response.data._id);
+                if (transactionsResponse.error === 0) {
+                    commit("updateAccountTransactions", transactionsResponse.data); // Appelle la mutation
+                } else {
+                    console.error("Erreur lors de la récupération des transactions :", transactionsResponse.data);
+                }
             } else {
-                console.log(response.data)
-                commit('updateAccountNumberError', -1)
+                commit("updateAccountNumberError", -1);
             }
         },
-        async getAccountTransactions({commit}, number) {
-            console.log('get account transactions');
-            let response = await BankAccountService.getAccountTransactions(number)
-            if (response.error === 0) {
-                commit('updateAccountTransactions', response.data)
-                commit('updateAccountNumberError', 1)
-            } else {
-                console.log(response.data)
-                commit('updateAccountNumberError', -1)
-            }
+
+        logout({ commit }) {
+            commit("clearAccount"); // Déclenche la mutation pour déconnecter l'utilisateur
         },
-    }
-})
+        async createTransaction({ commit }, transactionData) {
+            const response = await BankAccountService.createTransaction(transactionData);
+            if (response.error === 0) {
+                commit("addTransaction", response.data);
+            } else {
+                throw new Error(response.data); // Gérer les erreurs ici
+            }
+            return response;
+        },
+    },
+};

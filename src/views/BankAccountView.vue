@@ -1,54 +1,42 @@
 <template>
   <div>
-    <h1>Account data</h1>
-
-    <span>account number</span><input v-model="number"><button @click="resetAccountNumber">Reset</button>
-    <br />
-    <button :disabled="!isAccountNumberValid" @click="getAccountAmount(number)">Get amount</button><button :disabled="!isAccountNumberValid" @click="getAccountTransactions(number)">Get transactions</button>
-    <p v-if="accountNumberError===-1">invalid account number</p>
-    <hr />
-    <span>available amount : </span>
-    <span v-if="accountNumberError === 1" >{{accountAmount}}</span>
-    <span v-else></span>
-    <hr />
-    <p>passed transactions:</p>
-    <div v-if="accountNumberError === 1">
-      <ul>
-        <li v-for="(trans,index) in accountTransactions" :key="index">{{trans.amount}} the {{convertDate(trans.date.$date)}}</li>
-      </ul>
+    <div>
+      <div v-if="!isAccountValid">
+        <label for="account-number">n° de compte</label>
+        <input type="text" id="account-number" v-model="accountNumber" />
+        <button @click="validateAccount">Valider</button>
+        <p v-if="accountNumberError === -1" style="color: red;">
+          Numéro de compte invalide. Veuillez réessayer.
+        </p>
+      </div>
+      <div v-else>
+        <p>Connecté au compte {{ currentAccount.number }}</p>
+        <p>Solde disponible : {{ currentAccount.amount }} €</p>
+      </div>
     </div>
-    <span v-else></span>
-
   </div>
-
 </template>
 
 <script>
+import { mapActions, mapState } from "vuex";
 
-import {mapState, mapActions, mapMutations} from 'vuex'
 export default {
-  name: 'BankAccountView',
-  data: () => ({
-    number: '',
-  }),
+  data() {
+    return {
+      accountNumber: "",
+    };
+  },
   computed: {
-    ...mapState(['accountAmount', 'accountTransactions','accountNumberError']),
-    isAccountNumberValid() {
-      const rexp = RegExp('^[A-Za-z0-9]{22}-[0-9]{7}$','g')
-      return rexp.test(this.number)
-    }
+    ...mapState("bank", ["currentAccount", "accountNumberError"]),
+    isAccountValid() {
+      return this.currentAccount !== null && this.accountNumberError === 0;
+    },
   },
   methods: {
-    ...mapActions(['getAccountAmount','getAccountTransactions']),
-    ...mapMutations(['updateAccountNumberError']),
-    convertDate(date) {
-      let d = new Date(date)
-      return d.getMonth()+"/"+d.getDate()+"/"+d.getFullYear()+" the "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds()
+    ...mapActions("bank", ["getAccount"]),
+    async validateAccount() {
+      await this.getAccount(this.accountNumber);
     },
-    resetAccountNumber() {
-      this.number = ''
-      this.updateAccountNumberError(0)
-    }
-  }
-}
+  },
+};
 </script>

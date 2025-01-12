@@ -37,6 +37,11 @@ const routes = [
     ],
   },
   {
+    path: '/bank',
+    name: 'bank',
+    component: () => import('../views/BankHome.vue'),
+  },
+  {
     path: '/bank/account',
     name: 'bankaccount',
     component: () => import('../views/BankAccountView.vue'),
