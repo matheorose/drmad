@@ -9,6 +9,8 @@ import bcrypt from 'bcryptjs';
   Exemple 1 : se loguer auprès de la boutique
  */
 
+
+
 function getAllViruses() {
   return {error: 0, data: items}
 }

@@ -54,5 +54,9 @@ export default {
       this.$emit('list-button-clicked', selectedItems);
     },
   },
+
+  mounted() {
+    console.log("Données reçues par CheckedList :", this.data);
+  },
 }
 </script>
